@@ -14,11 +14,7 @@ public class SpawnItems : MonoBehaviour
     [SerializeField]
     private int MaxVisible;
     [SerializeField]
-    private int ExpireAmount;
-    [SerializeField]
-    private int ExpireMin;
-    [SerializeField]
-    private int ExpireMax;
+    private int ExpireAmount;    
     [SerializeField]
     private List<GameObject> Items;
     
@@ -98,7 +94,7 @@ public class SpawnItems : MonoBehaviour
 
     public IEnumerator Expire(GameObject item, Transform p, TextMeshProUGUI txt)
     {
-        int life = Random.Range(ExpireMin, ExpireMax + 1);
+        int life = Random.Range(GameInfo.ExpireMin, GameInfo.ExpireMax + 1);
 
         for (int i = life; i > 0; i--)
         {

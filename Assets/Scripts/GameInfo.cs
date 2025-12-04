@@ -12,4 +12,9 @@ public class GameInfo : MonoBehaviour
     public static int IncreaseScore = 1;
     public static int DecreaseScore = 2;
     public static int Score = 0;
+
+    public static int FallTime = 5;
+    
+    public static int ExpireMin = 5;    
+    public static int ExpireMax = 10;
 }
