@@ -10,11 +10,17 @@ public class SpawnItems : MonoBehaviour
     [SerializeField]
     private GameObject ShelfUnits_List;
     [SerializeField]
-    private int MaxVisible;
-    [SerializeField]
     private GameObject ExpireCanvas;
     [SerializeField]
+    private int MaxVisible;
+    [SerializeField]
     private int ExpireAmount;
+    [SerializeField]
+    private int ExpireMin;
+    [SerializeField]
+    private int ExpireMax;
+    [SerializeField]
+    private List<GameObject> Items;
     
     // Start is called before the first frame update
     void Start()
@@ -28,13 +34,13 @@ public class SpawnItems : MonoBehaviour
 
                 foreach (Transform pos in posList)
                 {
-                    GameInfo.FreePos.Add(pos);
+                    GameInfo.Pos.Add(pos);
                 }
             }
         }
 
         // If MaxVisible is bigger than the amount of spawn positions, set MaxVisible to max
-        if (MaxVisible > GameInfo.FreePos.Count) MaxVisible = GameInfo.FreePos.Count;
+        if (MaxVisible > GameInfo.Pos.Count) MaxVisible = GameInfo.Pos.Count;
 
         // Spawn items
         for (int i = 0; i < MaxVisible; i++)
@@ -54,42 +60,56 @@ public class SpawnItems : MonoBehaviour
         
     }
 
-    private void StartExpire()
+    public void Spawn()
     {
-        Transform p = GameInfo.OccupiedPos[Random.Range(0, GameInfo.OccupiedPos.Count)];
-        GameInfo.ExpiringPos.Add(p);
-        GameInfo.OccupiedPos.Remove(p);
+        // Calculate free positions available
+        List<Transform> freePos = new List<Transform> (GameInfo.Pos);        
+        foreach (GameObject i in GameInfo.CurrentItems)
+        {            
+            freePos.Remove(i.transform.parent);
+        }        
 
-        GameObject item = p.GetChild(0).gameObject;
+        // Selects random free position and item        
+        Transform p = freePos[Random.Range(0, freePos.Count)];
+        GameObject item = Items[Random.Range(0, Items.Count)];
+
+        // Spawn in item at position
+        GameObject newItem = Instantiate(item, p);
+        GameInfo.CurrentItems.Add(newItem);        
+    }
+
+    public void StartExpire()
+    {
+        // Calculate fresh items available
+        List<GameObject> freshItems = new List<GameObject> (GameInfo.CurrentItems);
+        foreach (GameObject i in GameInfo.ExpiringItems)
+        {
+            freshItems.Remove(i);
+        }
+
+        // Select random item to expire
+        GameObject item = freshItems[Random.Range(0, freshItems.Count)];
+
+        GameInfo.ExpiringItems.Add(item);
         GameObject canvas = Instantiate(ExpireCanvas, item.transform);
-        TextMeshProUGUI txtObj = canvas.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-
-        StartCoroutine(Expire(item, p, txtObj));
+        TextMeshProUGUI txt = canvas.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        StartCoroutine(Expire(item, item.transform.parent, txt));        
     }
 
-    private void Spawn()
+    public IEnumerator Expire(GameObject item, Transform p, TextMeshProUGUI txt)
     {
-        Transform p = GameInfo.FreePos[Random.Range(0, GameInfo.FreePos.Count)];
-        GameObject selectedItem = GameInfo.Items[Random.Range(0, GameInfo.Items.Count)];
-        
-        Instantiate(selectedItem, p);
-        GameInfo.OccupiedPos.Add(p);
-        GameInfo.FreePos.Remove(p);
-    }
-
-    public IEnumerator Expire(GameObject item, Transform p, TextMeshProUGUI txtObj)
-    {
-        int life = Random.Range(5, 11);
+        int life = Random.Range(ExpireMin, ExpireMax + 1);
 
         for (int i = life; i > 0; i--)
         {
-            txtObj.text = i.ToString();
+            txt.text = i.ToString();
             yield return new WaitForSeconds(1);
+
         }
 
-        GameInfo.ExpiringPos.Remove(p);
-        GameInfo.FreePos.Add(p);
-        Destroy(item);        
+        GameInfo.CurrentItems.Remove(item);
+        GameInfo.ExpiringItems.Remove(item);
+        Destroy(item);
         Spawn();
         StartExpire();
     }
