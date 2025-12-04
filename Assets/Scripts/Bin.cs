@@ -3,21 +3,17 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class Collection : MonoBehaviour
+public class Bin : MonoBehaviour
 {
     [SerializeField]
     private TextMeshProUGUI scoreTxt;
     [SerializeField]
-    private TextMeshProUGUI increaseTxt;
-    [SerializeField]
-    private TextMeshProUGUI decreaseTxt;    
-    [SerializeField]
     private SpawnItems spawnItems;
-    
+
     // Start is called before the first frame update
     void Start()
     {
-        scoreTxt.text = "Score: " + GameInfo.Score.ToString();        
+        
     }
 
     // Update is called once per frame
@@ -30,8 +26,8 @@ public class Collection : MonoBehaviour
     {
         GameObject item = other.gameObject;        
 
-        if (item.CompareTag("Healthy")) GameInfo.Score += GameInfo.IncreaseScore;        
-        else GameInfo.Score -= GameInfo.DecreaseScore;        
+        if (item.CompareTag("Healthy")) GameInfo.Score -= GameInfo.DecreaseScore;
+        else GameInfo.Score += GameInfo.IncreaseScore;
         scoreTxt.text = "Score: " + GameInfo.Score;
 
         GameInfo.CurrentItems.Remove(item);
